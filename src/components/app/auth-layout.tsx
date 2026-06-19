@@ -1,13 +1,18 @@
-import { authAtom } from "../../atoms/auth-atom"
-import { useAtom } from "jotai"
-import { useNavigate, Outlet } from "react-router"
+import { authAtom } from "@/atoms/auth-atom"
+import { useAtomValue } from "jotai"
+import { Navigate, Outlet } from "react-router"
 
 export function AuthLayout() {
-  const [auth] = useAtom(authAtom)
-  const navigate = useNavigate()
+  const auth = useAtomValue(authAtom)
+
+  // Still loading from localStorage, don't redirect yet
+  if (auth === undefined) {
+    return null
+  }
 
   if (!auth) {
-    return navigate("/login")
+    return <Navigate to="/login" replace />
   }
+
   return <Outlet />
 }
