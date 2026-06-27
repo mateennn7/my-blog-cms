@@ -3,12 +3,20 @@ import { useSetAtom } from "jotai"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 
+const PURPLE = "#7c3aed"
+const GRAD = "linear-gradient(135deg, #7c3aed, #a855f7)"
+
 export function SignIn() {
   const setAuth = useSetAtom(authAtom)
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const [dark] = useState(() => localStorage.getItem("theme") === "dark")
+
+  const t = dark
+    ? { bg: "#0d0b14", card: "#131020", border: "#1e1a2e", text: "#f0eeff", muted: "#8a85a0", mutedBg: "#1a1628" }
+    : { bg: "#f8f7fc", card: "#ffffff", border: "#e2dff0", text: "#0f0d1a", muted: "#6b6880", mutedBg: "#eeecf8" }
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -22,72 +30,82 @@ export function SignIn() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#faf6f1", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", padding: "24px" }}>
+    <div style={{ minHeight: "100vh", background: t.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif", padding: 24 }}>
 
       {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "28px" }}>
-        <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#c4622d" }} />
-        <span style={{ fontFamily: "'Fraunces', serif", fontSize: "22px", color: "#2c1a0e" }}>Inkwell</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32 }}>
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: GRAD, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ color: "white", fontSize: 16, fontWeight: 700 }}>B</span>
+        </div>
+        <span style={{ fontWeight: 700, fontSize: 20, background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          BlogCMS
+        </span>
       </div>
 
       {/* Heading */}
-      <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: "28px", color: "#2c1a0e", marginBottom: "6px", textAlign: "center" }}>
-        Welcome <em style={{ color: "#c4622d", fontStyle: "italic" }}>back.</em>
+      <h1 style={{ margin: "0 0 8px", fontSize: 28, fontWeight: 800, color: t.text, textAlign: "center", letterSpacing: "-0.02em" }}>
+        Welcome{" "}
+        <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>back.</span>
       </h1>
-      <p style={{ fontSize: "14px", color: "#a08060", marginBottom: "32px" }}>Sign in to share your stories</p>
+      <p style={{ margin: "0 0 36px", fontSize: 14, color: t.muted }}>Sign in to share your stories</p>
 
       {/* Card */}
-      <div style={{ background: "#fff", borderRadius: "16px", padding: "32px", width: "100%", maxWidth: "400px", border: "1px solid #ede5d8" }}>
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: "18px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#2c1a0e", marginBottom: "8px" }}>
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ width: "100%", border: "1px solid #ede5d8", borderRadius: "8px", padding: "11px 14px", fontSize: "13px", outline: "none", fontFamily: "inherit", background: "#faf6f1", color: "#2c1a0e" }}
-            />
-          </div>
+      <div style={{ background: t.card, borderRadius: 16, padding: 32, width: "100%", maxWidth: 400, border: `1px solid ${t.border}` }}>
 
-          <div style={{ marginBottom: "24px" }}>
-            <label style={{ display: "block", fontSize: "13px", fontWeight: 500, color: "#2c1a0e", marginBottom: "8px" }}>
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{ width: "100%", border: "1px solid #ede5d8", borderRadius: "8px", padding: "11px 14px", fontSize: "13px", outline: "none", fontFamily: "inherit", background: "#faf6f1", color: "#2c1a0e" }}
-            />
-          </div>
-
-          {error && <p style={{ fontSize: "12px", color: "#b04040", marginBottom: "14px" }}>{error}</p>}
-
-          <button
-            type="submit"
-            style={{ width: "100%", background: "#c4622d", color: "#fff", border: "none", borderRadius: "8px", padding: "12px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.04em" }}
-          >
-            SIGN IN
-          </button>
-        </form>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", margin: "20px 0" }}>
-          <div style={{ flex: 1, height: "1px", background: "#ede5d8" }} />
-          <span style={{ fontSize: "12px", color: "#c4a882" }}>or</span>
-          <div style={{ flex: 1, height: "1px", background: "#ede5d8" }} />
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: t.text, marginBottom: 8 }}>
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ width: "100%", border: `1px solid ${t.border}`, borderRadius: 8, padding: "11px 14px", fontSize: 13, outline: "none", fontFamily: "inherit", background: t.mutedBg, color: t.text, boxSizing: "border-box" }}
+            onFocus={e => e.target.style.borderColor = PURPLE}
+            onBlur={e => e.target.style.borderColor = t.border}
+          />
         </div>
 
-        <div style={{ background: "#faf6f1", borderRadius: "8px", padding: "14px", textAlign: "center", border: "1px solid #ede5d8" }}>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "#2c1a0e", marginBottom: "3px" }}>🏷️ Demo Mode</div>
-          <div style={{ fontSize: "12px", color: "#c4622d" }}>Use any email & password to sign in</div>
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: t.text, marginBottom: 8 }}>
+            Password
+          </label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ width: "100%", border: `1px solid ${t.border}`, borderRadius: 8, padding: "11px 14px", fontSize: 13, outline: "none", fontFamily: "inherit", background: t.mutedBg, color: t.text, boxSizing: "border-box" }}
+            onFocus={e => e.target.style.borderColor = PURPLE}
+            onBlur={e => e.target.style.borderColor = t.border}
+          />
+        </div>
+
+        {error && <p style={{ fontSize: 12, color: "#ef4444", margin: "12px 0" }}>{error}</p>}
+
+        <button
+          onClick={handleLogin}
+          style={{ width: "100%", background: GRAD, color: "#fff", border: "none", borderRadius: 8, padding: "12px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: "0.05em", marginTop: 20 }}
+        >
+          SIGN IN
+        </button>
+
+        {/* Divider */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "20px 0" }}>
+          <div style={{ flex: 1, height: 1, background: t.border }} />
+          <span style={{ fontSize: 12, color: t.muted }}>or</span>
+          <div style={{ flex: 1, height: 1, background: t.border }} />
+        </div>
+
+        {/* Demo box */}
+        <div style={{ background: "rgba(124,58,237,0.06)", borderRadius: 10, padding: 14, textAlign: "center", border: `1px solid rgba(124,58,237,0.15)` }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: t.text, marginBottom: 3 }}>🏷️ Demo Mode</div>
+          <div style={{ fontSize: 12, color: PURPLE }}>Use any email & password to sign in</div>
         </div>
       </div>
 
-      <p style={{ fontSize: "12px", color: "#c4a882", marginTop: "24px" }}>A warm place for your ideas</p>
+      <p style={{ fontSize: 12, color: t.muted, marginTop: 24 }}>A modern place for your ideas ✦</p>
     </div>
   )
 }

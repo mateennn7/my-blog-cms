@@ -2,13 +2,22 @@ import { Link } from "react-router"
 import { useEffect, useState } from "react"
 
 const defaultPosts = [
-  { title: "Getting Started with React — The fundamentals you actually need", author: "Sarah Chen", slug: "post-1", date: "Mar 15, 2024", desc: "Skip the fluff. Learn the core concepts that make React click.", tag: "React", tagStyle: { background: "#fbeee8", color: "#c4622d" }, accent: "linear-gradient(90deg,#c4622d,#d4943a)", featured: true },
-  { title: "Advanced TypeScript Patterns", author: "Mike Johnson", slug: "post-2", date: "Mar 12, 2024", desc: "Master patterns for scalable, type-safe applications.", tag: "TypeScript", tagStyle: { background: "#fdf3e3", color: "#b07020" }, accent: "linear-gradient(90deg,#d4943a,#c4622d)", featured: false },
-  { title: "Web Performance Optimization", author: "Emma Rodriguez", slug: "post-3", date: "Mar 10, 2024", desc: "Essential techniques to make your web apps lightning fast.", tag: "Performance", tagStyle: { background: "#fce8e8", color: "#b04040" }, accent: "linear-gradient(90deg,#b04040,#c4622d)", featured: false },
-  { title: "Building Real-time Apps", author: "David Kim", slug: "post-4", date: "Mar 8, 2024", desc: "Responsive, real-time applications with WebSockets.", tag: "WebSockets", tagStyle: { background: "#fbeee8", color: "#c4622d" }, accent: "linear-gradient(90deg,#c4622d,#b07020)", featured: false },
-  { title: "Improved UI", author: "You", slug: "post-5", date: "Jun 19, 2026", desc: "Finding bugs and improving the UI of this very platform.", tag: "CMS", tagStyle: { background: "#fdf3e3", color: "#b07020" }, accent: "linear-gradient(90deg,#d4943a,#c4622d)", featured: false },
-  { title: "CI/CD Pipelines Simplified", author: "Arun Patel", slug: "post-6", date: "Mar 5, 2024", desc: "Automate your deployments with modern DevOps workflows.", tag: "DevOps", tagStyle: { background: "#fce8e8", color: "#b04040" }, accent: "linear-gradient(90deg,#b04040,#d4943a)", featured: false },
+  { title: "Getting Started with React — The fundamentals you actually need", author: "Sarah Chen", slug: "post-1", date: "Mar 15, 2024", desc: "Skip the fluff. Learn the core concepts that make React click.", tag: "React", featured: true },
+  { title: "Advanced TypeScript Patterns", author: "Mike Johnson", slug: "post-2", date: "Mar 12, 2024", desc: "Master patterns for scalable, type-safe applications.", tag: "TypeScript", featured: false },
+  { title: "Web Performance Optimization", author: "Emma Rodriguez", slug: "post-3", date: "Mar 10, 2024", desc: "Essential techniques to make your web apps lightning fast.", tag: "Performance", featured: false },
+  { title: "Building Real-time Apps", author: "David Kim", slug: "post-4", date: "Mar 8, 2024", desc: "Responsive, real-time applications with WebSockets.", tag: "WebSockets", featured: false },
+  { title: "Improved UI", author: "You", slug: "post-5", date: "Jun 19, 2026", desc: "Finding bugs and improving the UI of this very platform.", tag: "CMS", featured: false },
+  { title: "CI/CD Pipelines Simplified", author: "Arun Patel", slug: "post-6", date: "Mar 5, 2024", desc: "Automate your deployments with modern DevOps workflows.", tag: "DevOps", featured: false },
 ]
+
+const tagColors: Record<string, { bg: string; color: string }> = {
+  React:       { bg: "rgba(124,58,237,0.1)",  color: "#7c3aed" },
+  TypeScript:  { bg: "rgba(59,130,246,0.1)",  color: "#3b82f6" },
+  Performance: { bg: "rgba(16,185,129,0.1)",  color: "#10b981" },
+  WebSockets:  { bg: "rgba(245,158,11,0.1)",  color: "#f59e0b" },
+  CMS:         { bg: "rgba(236,72,153,0.1)",  color: "#ec4899" },
+  DevOps:      { bg: "rgba(239,68,68,0.1)",   color: "#ef4444" },
+}
 
 type Post = {
   title: string
@@ -17,105 +26,149 @@ type Post = {
   date: string
   desc: string
   tag: string
-  tagStyle: React.CSSProperties
-  accent: string
   featured?: boolean
   saved?: boolean
 }
 
+const PURPLE = "#7c3aed"
+const PURPLE2 = "#a855f7"
+const GRAD = `linear-gradient(135deg, ${PURPLE}, ${PURPLE2})`
+
 function Posts() {
   const [posts, setPosts] = useState<Post[]>(defaultPosts)
+  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark")
+
+  const t = dark
+    ? { bg: "#0d0b14", card: "#131020", border: "#1e1a2e", text: "#f0eeff", muted: "#8a85a0", mutedBg: "#1a1628", sidebar: "#0f0d1a" }
+    : { bg: "#f8f7fc", card: "#ffffff", border: "#e2dff0", text: "#0f0d1a", muted: "#6b6880", mutedBg: "#eeecf8", sidebar: "#f0edf8" }
 
   useEffect(() => {
     loadPosts()
   }, [])
 
+  function toggleDark() {
+    const next = !dark
+    setDark(next)
+    localStorage.setItem("theme", next ? "dark" : "light")
+    document.documentElement.classList.toggle("dark", next)
+  }
+
   function loadPosts() {
-  const saved: Post[] = JSON.parse(localStorage.getItem("posts") || "[]").map((p: Post) => ({ ...p, saved: true }))
-  const deletedHardcoded: string[] = JSON.parse(localStorage.getItem("deletedPosts") || "[]")
-  const filteredDefaults = defaultPosts.filter(p => !deletedHardcoded.includes(p.slug))
-  setPosts([...filteredDefaults, ...saved])
-}
+    const saved: Post[] = JSON.parse(localStorage.getItem("posts") || "[]").map((p: Post) => ({ ...p, saved: true }))
+    const deletedHardcoded: string[] = JSON.parse(localStorage.getItem("deletedPosts") || "[]")
+    const filteredDefaults = defaultPosts.filter(p => !deletedHardcoded.includes(p.slug))
+    setPosts([...filteredDefaults, ...saved])
+  }
 
   function handleDelete(slug: string) {
-  const saved: Post[] = JSON.parse(localStorage.getItem("posts") || "[]")
-  const updated = saved.filter((p: Post) => p.slug !== slug)
-  localStorage.setItem("posts", JSON.stringify(updated))
-
-  // Also track deleted hardcoded posts
-  const deletedHardcoded: string[] = JSON.parse(localStorage.getItem("deletedPosts") || "[]")
-  if (!deletedHardcoded.includes(slug)) {
-    localStorage.setItem("deletedPosts", JSON.stringify([...deletedHardcoded, slug]))
+    const saved: Post[] = JSON.parse(localStorage.getItem("posts") || "[]")
+    const updated = saved.filter((p: Post) => p.slug !== slug)
+    localStorage.setItem("posts", JSON.stringify(updated))
+    const deletedHardcoded: string[] = JSON.parse(localStorage.getItem("deletedPosts") || "[]")
+    if (!deletedHardcoded.includes(slug)) {
+      localStorage.setItem("deletedPosts", JSON.stringify([...deletedHardcoded, slug]))
+    }
+    loadPosts()
   }
 
-  loadPosts()
-}
-  const s: Record<string, React.CSSProperties> = {
-    page: { background: "#faf6f1", minHeight: "100vh", padding: "28px", fontFamily: "'DM Sans', sans-serif" },
-    header: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "36px", paddingBottom: "20px", borderBottom: "1px solid #ede5d8" },
-    logoWrap: { display: "flex", alignItems: "center", gap: "8px" },
-    logoDot: { width: "9px", height: "9px", borderRadius: "50%", background: "#c4622d" },
-    logoText: { fontFamily: "'Fraunces', serif", fontSize: "18px", color: "#2c1a0e" },
-    writeBtn: { background: "#c4622d", color: "#fff", border: "none", padding: "9px 18px", borderRadius: "8px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" },
-    heroLabel: { fontSize: "11px", fontWeight: 600, color: "#c4622d", letterSpacing: "0.12em", textTransform: "uppercase" as const, marginBottom: "8px" },
-    heroTitle: { fontFamily: "'Fraunces', serif", fontSize: "32px", color: "#2c1a0e", lineHeight: 1.2, marginBottom: "6px" },
-    heroSub: { fontSize: "14px", color: "#a08060", marginBottom: "32px" },
-    grid: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" },
-    card: { background: "#fff", borderRadius: "14px", border: "1px solid #ede5d8", overflow: "hidden" },
-    featuredCard: { background: "#fdf8f4", borderRadius: "14px", border: "1px solid #ede5d8", overflow: "hidden", gridColumn: "span 2" },
-    cardBody: { padding: "16px" },
-    tag: { display: "inline-block", fontSize: "11px", fontWeight: 500, padding: "3px 10px", borderRadius: "20px", marginBottom: "10px" },
-    cardTitle: { fontFamily: "'Fraunces', serif", fontSize: "15px", color: "#2c1a0e", lineHeight: 1.35, marginBottom: "6px" },
-    featuredTitle: { fontFamily: "'Fraunces', serif", fontSize: "19px", color: "#2c1a0e", lineHeight: 1.25, marginBottom: "6px" },
-    cardDesc: { fontSize: "12px", color: "#a08060", lineHeight: 1.65, marginBottom: "14px" },
-    cardFooter: { display: "flex", alignItems: "center", justifyContent: "space-between" },
-    cardAuthor: { fontSize: "11px", color: "#c4a882" },
-    readLink: { fontSize: "11px", fontWeight: 600, color: "#c4622d", letterSpacing: "0.04em", textDecoration: "none" },
-    deleteBtn: { fontSize: "11px", fontWeight: 600, color: "#b04040", background: "#fce8e8", border: "none", borderRadius: "6px", padding: "4px 10px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" },
-  }
+  const featured = posts.find(p => p.featured)
+  const rest = posts.filter(p => !p.featured)
 
   return (
-    <div style={s.page}>
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-        <div style={s.header}>
-          <div style={s.logoWrap}>
-            <div style={s.logoDot} />
-            <span style={s.logoText}>Inkwell</span>
+    <div style={{ background: t.bg, minHeight: "100vh", color: t.text, fontFamily: "system-ui, -apple-system, sans-serif" }}>
+
+      {/* Navbar */}
+      <nav style={{ background: t.card, borderBottom: `1px solid ${t.border}`, padding: "0 32px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: GRAD, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ color: "white", fontSize: 14, fontWeight: 700 }}>B</span>
           </div>
-          <Link to="/create-post">
-            <button style={s.writeBtn}>+ Write</button>
-          </Link>
+          <span style={{ fontWeight: 700, fontSize: 17, background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            BlogCMS
+          </span>
         </div>
 
-        <div style={s.heroLabel}>Featured Collection</div>
-        <div style={s.heroTitle}>Ideas worth <em style={{ color: "#c4622d", fontStyle: "italic" }}>reading.</em></div>
-        <div style={s.heroSub}>Handpicked stories from curious minds.</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            onClick={toggleDark}
+            style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${t.border}`, background: t.mutedBg, color: t.muted, cursor: "pointer", fontSize: 14 }}
+          >
+            {dark ? "☀️" : "🌙"}
+          </button>
+          <Link to="/create-post">
+            <button style={{ background: GRAD, color: "#fff", border: "none", padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}>
+              + New Post
+            </button>
+          </Link>
+        </div>
+      </nav>
 
-        <div style={s.grid}>
-          {posts.map((post, i) => (
-            <div key={i} style={post.featured ? s.featuredCard : s.card}>
-              <div style={{ height: "3px", background: post.accent }} />
-              <div style={s.cardBody}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-                  <span style={{ ...s.tag, marginBottom: 0, ...post.tagStyle }}>{post.tag}</span>
-                  <button
-  style={s.deleteBtn}
-  onClick={() => {
-    if (confirm("Delete this post?")) handleDelete(post.slug)
-  }}
->
-  Delete
-</button>
-                </div>
-                <div style={post.featured ? s.featuredTitle : s.cardTitle}>{post.title}</div>
-                <div style={s.cardDesc}>{post.desc}</div>
-                <div style={s.cardFooter}>
-                  <span style={s.cardAuthor}>{post.author} · {post.date}</span>
-                  <Link to={`/posts/${post.slug}`} style={s.readLink}>READ →</Link>
-                </div>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 24px" }}>
+
+        {/* Hero */}
+        <div style={{ marginBottom: 40, textAlign: "center" }}>
+          <div style={{ display: "inline-block", fontSize: 11, fontWeight: 700, color: PURPLE, letterSpacing: "0.12em", textTransform: "uppercase", background: "rgba(124,58,237,0.08)", padding: "4px 14px", borderRadius: 999, marginBottom: 14 }}>
+            Featured Collection
+          </div>
+          <h1 style={{ margin: "0 0 10px", fontSize: 40, fontWeight: 800, letterSpacing: "-0.02em" }}>
+            Ideas worth{" "}
+            <span style={{ background: GRAD, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>reading.</span>
+          </h1>
+          <p style={{ margin: 0, fontSize: 15, color: t.muted }}>Handpicked stories from curious minds.</p>
+        </div>
+
+        {/* Featured post */}
+        {featured && (
+          <div style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", marginBottom: 24, display: "flex", flexDirection: "column" }}>
+            <div style={{ height: 4, background: GRAD }} />
+            <div style={{ padding: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 999, background: tagColors[featured.tag]?.bg || "rgba(124,58,237,0.1)", color: tagColors[featured.tag]?.color || PURPLE }}>
+                  {featured.tag}
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: PURPLE, background: "rgba(124,58,237,0.08)", padding: "3px 10px", borderRadius: 999 }}>✦ Featured</span>
+              </div>
+              <h2 style={{ margin: "0 0 10px", fontSize: 24, fontWeight: 700, lineHeight: 1.3 }}>{featured.title}</h2>
+              <p style={{ margin: "0 0 20px", fontSize: 14, color: t.muted, lineHeight: 1.7 }}>{featured.desc}</p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, color: t.muted }}>{featured.author} · {featured.date}</span>
+                <Link to={`/posts/${featured.slug}`} style={{ fontSize: 13, fontWeight: 600, color: PURPLE, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                  Read article →
+                </Link>
               </div>
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+          {rest.map((post, i) => {
+            const tc = tagColors[post.tag] || { bg: "rgba(124,58,237,0.1)", color: PURPLE }
+            return (
+              <div key={i} style={{ background: t.card, border: `1px solid ${t.border}`, borderRadius: 14, overflow: "hidden", display: "flex", flexDirection: "column", transition: "box-shadow 0.2s" }}>
+                <div style={{ height: 3, background: GRAD }} />
+                <div style={{ padding: 18, flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: tc.bg, color: tc.color }}>{post.tag}</span>
+                    <button
+                      onClick={() => { if (confirm("Delete this post?")) handleDelete(post.slug) }}
+                      style={{ fontSize: 11, color: "#ef4444", background: "rgba(239,68,68,0.08)", border: "none", borderRadius: 6, padding: "3px 10px", cursor: "pointer", fontWeight: 600 }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <h3 style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 600, lineHeight: 1.4, flex: 1 }}>{post.title}</h3>
+                  <p style={{ margin: "0 0 16px", fontSize: 12, color: t.muted, lineHeight: 1.65 }}>{post.desc}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 11, color: t.muted }}>{post.author} · {post.date}</span>
+                    <Link to={`/posts/${post.slug}`} style={{ fontSize: 11, fontWeight: 700, color: PURPLE, textDecoration: "none", letterSpacing: "0.04em" }}>
+                      READ →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
